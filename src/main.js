@@ -35,6 +35,7 @@ function tree(x,z){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35
 for(let i=0;i<55;i++){let x=(Math.random()-.5)*190,z=(Math.random()-.5)*190;if(Math.abs(x)<9||Math.abs(z)<9||Math.abs(Math.abs(x)-55)<8||Math.abs(Math.abs(z)-48)<8)continue;tree(x,z)}
 // Mhusika mkuu: mwanaume, mhusika wa kubuni wa RANIA CITY
 const player=new THREE.Group();
+player.userData.name='Muhsin';
 const skin=mat(0x9b684b),shirt=mat(0x1d3557),trousers=mat(0x242a32),shoes=mat(0x17191b);
 const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.85,5,10),shirt);torso.scale.set(1.12,1,0.82);torso.position.y=1.18;torso.castShadow=true;player.add(torso);
 const neck=new THREE.Mesh(new THREE.CylinderGeometry(.16,.19,.25,10),skin);neck.position.y=1.82;player.add(neck);
@@ -83,20 +84,4 @@ actor.position.x=THREE.MathUtils.clamp(actor.position.x,-103,103);actor.position
 const target=actor.position.clone();target.y+=driving?2.3:2.1;const offset=new THREE.Vector3(0,(driving||drivingBoat)?6:5,(driving||drivingBoat)?-10:-8).applyAxisAngle(new THREE.Vector3(0,1,0),actor.rotation.y);camera.position.lerp(target.clone().add(offset),.09);camera.lookAt(target);
 if(!missionDone&&actor.position.distanceTo(marker.position)<4){missionDone=true;document.querySelector('#cash').textContent='$500';document.querySelector('#mission').innerHTML='MISSION 01 · COMPLETE<br><b>City Explorer — Reward $250</b>';hint.textContent='Mission complete! Explore the city.'}
 projectiles=projectiles.filter(p=>{p.mesh.position.addScaledVector(p.dir,dt*24);p.life-=dt;if(p.life<=0){scene.remove(p.mesh);return false}return true});water.material.opacity=.82+Math.sin(t*.0015)*.08;renderer.render(scene,camera)}requestAnimationFrame(animate);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-+(amount-300);hasWeapon=true;document.querySelector('#weaponShop').hidden=true;hint.textContent='Umenunua kifaa cha mchezo. Bonyeza × kutumia.'};
-
-const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');
-let stickPointer=null;
-function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.32,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}knob.style.transform=`translate(${dx}px,${dy}px)`;keys.left=dx < -max*.22;keys.right=dx > max*.22;keys.forward=dy < -max*.22;keys.back=dy > max*.22}
-stick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e)});
-stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)moveStick(e)});
-function resetStick(){stickPointer=null;knob.style.transform='translate(0,0)';keys.left=keys.right=keys.forward=keys.back=false}
-stick.addEventListener('pointerup',resetStick);stick.addEventListener('pointercancel',resetStick);
-let last=0;function animate(t){requestAnimationFrame(animate);const dt=Math.min((t-last)/1000||0,.04);last=t;marker.rotation.z+=dt*1.3;const actor=driving?car:player;let move=0,turn=0;if(keys.forward)move=1;if(keys.back)move=-.7;if(keys.left)turn=1;if(keys.right)turn=-1;
-if(driving){angle+=turn*dt*1.8;car.rotation.y=angle;car.position.x+=Math.sin(angle)*move*dt*13;car.position.z+=Math.cos(angle)*move*dt*13}else{if(turn)player.rotation.y+=turn*dt*2.4;if(move){player.position.x+=Math.sin(player.rotation.y)*move*dt*5;player.position.z+=Math.cos(player.rotation.y)*move*dt*5;legs.forEach((l,i)=>l.rotation.x=Math.sin(t*.012+i*Math.PI)*.45)}player.position.y+=(0-player.position.y)*Math.min(1,dt*9)}
-actor.position.x=THREE.MathUtils.clamp(actor.position.x,-103,103);actor.position.z=THREE.MathUtils.clamp(actor.position.z,-103,103);
-const target=actor.position.clone();target.y+=driving?2.3:2.1;const offset=new THREE.Vector3(0,driving?6:5,driving?-10:-8).applyAxisAngle(new THREE.Vector3(0,1,0),actor.rotation.y);camera.position.lerp(target.clone().add(offset),.09);camera.lookAt(target);
-if(!missionDone&&actor.position.distanceTo(marker.position)<4){missionDone=true;document.querySelector('#cash').textContent='$500';document.querySelector('#mission').innerHTML='MISSION 01 · COMPLETE<br><b>City Explorer — Reward $250</b>';hint.textContent='Mission complete! Explore the city.'}
-renderer.render(scene,camera)}requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
