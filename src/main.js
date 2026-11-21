@@ -6,7 +6,7 @@ const hud=document.createElement('div');hud.id='hud';hud.innerHTML=`
 <div id="brand">RANIA CITY <span style="color:#eab34b">OPEN WORLD</span></div>
 <div id="mission">MISSION 01 · CITY EXPLORER<br><b>Find the golden marker.</b></div>
 <div id="stats">HEALTH <b id="health">100</b> ♥<br>CASH <b id="cash">$250</b><br><span id="mode">ON FOOT</span></div>
-<div id="hint">Explore the city · Walk to the golden marker</div>
+<div id="hint">Chunguza jiji · Tafuta alama ya dhahabu</div><div id="weaponShop" hidden><b>Duka la vifaa</b><p>Bunduki ya mchezo — $300</p><button id="buyWeapon">NUNUA</button><button id="closeShop">FUNGA</button></div>
 <div id="controls">
 <div class="stick" id="stick" aria-label="Movement joystick"><div class="stick-ring">●</div><div class="stick-knob" id="knob"></div></div>
 <div class="actions">
@@ -40,14 +40,47 @@ const hair=new THREE.Mesh(new THREE.SphereGeometry(.35,10,8,0,Math.PI*2,0,Math.P
 const legs=[];for(const x of [-.22,.22]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.17,.55,3,6),mat(0x242a32));leg.position.set(x,.35,0);player.add(leg);legs.push(leg)}
 player.position.set(0,0,8);scene.add(player);
 const car=new THREE.Group();const chassis=new THREE.Mesh(new THREE.BoxGeometry(2.3,.65,4),mat(0xc13e32));chassis.position.y=.8;car.add(chassis);const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.8,.8,1.9),mat(0x8ac3d4,.35));cabin.position.set(0,1.48,-.25);car.add(cabin);for(const x of [-1,1])for(const z of [-1.3,1.3]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.22,12),mat(0x17191b));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.42,z);car.add(wheel)}car.position.set(5,0,8);car.visible=true;scene.add(car);
+
+// Ziwa na boti ya kuendesha
+const water=new THREE.Mesh(new THREE.CircleGeometry(24,48),new THREE.MeshStandardMaterial({color:0x247fa2,roughness:.25,metalness:.15,transparent:true,opacity:.9}));
+water.rotation.x=-Math.PI/2;water.position.set(76,.13,0);scene.add(water);
+const boat=new THREE.Group();
+const hull=new THREE.Mesh(new THREE.BoxGeometry(2.8,.65,6),mat(0xeeeeea,.35));hull.position.y=.45;boat.add(hull);
+const bow=new THREE.Mesh(new THREE.ConeGeometry(1.4,2,4),mat(0xf2f2e8));bow.rotation.x=Math.PI/2;bow.position.set(0,.45,-3.3);boat.add(bow);
+const seat=new THREE.Mesh(new THREE.BoxGeometry(1.5,.7,1.4),mat(0x354b5a));seat.position.set(0,1,-.4);boat.add(seat);
+boat.position.set(76,.1,5);scene.add(boat);
+const weaponShop=new THREE.Group();const shopBase=new THREE.Mesh(new THREE.BoxGeometry(7,4,6),mat(0x6d5140));shopBase.position.y=2;weaponShop.add(shopBase);const shopRoof=new THREE.Mesh(new THREE.BoxGeometry(7.5,.4,6.5),mat(0x9b3f32));shopRoof.position.y=4.2;weaponShop.add(shopRoof);weaponShop.position.set(-27,0,-28);scene.add(weaponShop);
+const shopMark=new THREE.Mesh(new THREE.TorusGeometry(1,.13,8,20),mat(0xffc342));shopMark.rotation.x=Math.PI/2;shopMark.position.set(-27,.3,-28);scene.add(shopMark);
+let hasWeapon=false,drivingBoat=false,boatAngle=0,projectiles=[];
 const marker=new THREE.Mesh(new THREE.TorusGeometry(1.35,.16,8,24),new THREE.MeshStandardMaterial({color:0xffc342,emissive:0x9b5d00}));marker.rotation.x=Math.PI/2;marker.position.set(27,.25,-22);scene.add(marker);
 const keys={};document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;const on=e=>{e.preventDefault();keys[k]=true;b.classList.add('active')};const off=e=>{e.preventDefault();keys[k]=false;b.classList.remove('active')};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)});
 addEventListener('keydown',e=>{if(e.key==='w'||e.key==='ArrowUp')keys.forward=true;if(e.key==='s'||e.key==='ArrowDown')keys.back=true;if(e.key==='a'||e.key==='ArrowLeft')keys.left=true;if(e.key==='d'||e.key==='ArrowRight')keys.right=true});addEventListener('keyup',e=>{keys.forward=keys.back=keys.left=keys.right=false});
 let driving=false,angle=0,missionDone=false;const action=document.querySelector('#action'),mode=document.querySelector('#mode'),hint=document.querySelector('#hint');
-action.onclick=()=>{if(!driving&&player.position.distanceTo(car.position)<4){driving=true;player.visible=false;mode.textContent='DRIVING';action.textContent='EXIT CAR';hint.textContent='Drive to explore · Use arrows to steer'}else if(driving){driving=false;player.position.copy(car.position);player.position.x+=2.7;player.visible=true;mode.textContent='ON FOOT';action.textContent='ENTER CAR'}else hint.textContent='Walk closer to the red car to enter'};
-document.querySelector('#jump').onclick=()=>{if(!driving)player.position.y=2.1};
+action.onclick=()=>{if(!drivingBoat&&!driving&&player.position.distanceTo(boat.position)<5){drivingBoat=true;player.visible=false;mode.textContent='BOAT';action.textContent='EXIT';hint.textContent='Unaendesha boti. Tumia joystick kuongoza.'}else if(drivingBoat){drivingBoat=false;player.visible=true;player.position.copy(boat.position);player.position.x+=3;mode.textContent='ON FOOT';action.textContent='□'}else if(!driving&&player.position.distanceTo(car.position)<4){driving=true;player.visible=false;mode.textContent='DRIVING';action.textContent='EXIT CAR';hint.textContent='Drive to explore · Use arrows to steer'}else if(driving){driving=false;player.position.copy(car.position);player.position.x+=2.7;player.visible=true;mode.textContent='ON FOOT';action.textContent='ENTER CAR'}else hint.textContent='Walk closer to the red car to enter'};
+document.querySelector('#jump').onclick=()=>{if(hasWeapon&&!driving&&!drivingBoat){const dir=new THREE.Vector3(Math.sin(player.rotation.y),0,Math.cos(player.rotation.y));const orb=new THREE.Mesh(new THREE.SphereGeometry(.13,8,8),mat(0xffc64a));orb.position.copy(player.position);orb.position.y+=1.2;scene.add(orb);projectiles.push({mesh:orb,dir,life:1.3});hint.textContent='Kitendo cha silaha ya mchezo!'}else if(!driving&&!drivingBoat)player.position.y=2.1};
 document.querySelector('#exit').onclick=()=>{if(driving)action.click();else hint.textContent='Ingia kwenye gari kwa kubonyeza □ ukiwa karibu nalo.'};
-document.querySelector('#interact').onclick=()=>{hint.textContent='Uchunguzi na mazungumzo ya Kiswahili yataongezwa kwenye hatua inayofuata.'};
+document.querySelector('#interact').onclick=()=>{
+ if(player.position.distanceTo(weaponShop.position)<10){document.querySelector('#weaponShop').hidden=false;return}
+ if(player.position.distanceTo(boat.position)<6){hint.textContent='Bonyeza □ ili kuendesha boti.';return}
+ hint.textContent='Hakuna kitu cha kuingiliana karibu nawe.'};
+document.querySelector('#closeShop').onclick=()=>document.querySelector('#weaponShop').hidden=true;
+document.querySelector('#buyWeapon').onclick=()=>{if(hasWeapon){hint.textContent='Tayari unamiliki kifaa hiki.';return}const cash=document.querySelector('#cash');const amount=Number(cash.textContent.replace(/[^0-9]/g,''));if(amount<300){hint.textContent='Huna fedha za kutosha. Tafuta misheni.';return}cash.textContent='
+const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');
+let stickPointer=null;
+function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.32,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}knob.style.transform=`translate(${dx}px,${dy}px)`;keys.left=dx < -max*.22;keys.right=dx > max*.22;keys.forward=dy < -max*.22;keys.back=dy > max*.22}
+stick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)moveStick(e)});
+function resetStick(){stickPointer=null;knob.style.transform='translate(0,0)';keys.left=keys.right=keys.forward=keys.back=false}
+stick.addEventListener('pointerup',resetStick);stick.addEventListener('pointercancel',resetStick);
+let last=0;function animate(t){requestAnimationFrame(animate);const dt=Math.min((t-last)/1000||0,.04);last=t;marker.rotation.z+=dt*1.3;const actor=drivingBoat?boat:(driving?car:player);let move=0,turn=0;if(keys.forward)move=1;if(keys.back)move=-.7;if(keys.left)turn=1;if(keys.right)turn=-1;
+if(drivingBoat){boatAngle+=turn*dt*1.1;boat.rotation.y=boatAngle;boat.position.x+=Math.sin(boatAngle)*move*dt*7;boat.position.z+=Math.cos(boatAngle)*move*dt*7;boat.position.x=THREE.MathUtils.clamp(boat.position.x,54,98);boat.position.z=THREE.MathUtils.clamp(boat.position.z,-22,22)}else if(driving){angle+=turn*dt*1.8;car.rotation.y=angle;car.position.x+=Math.sin(angle)*move*dt*13;car.position.z+=Math.cos(angle)*move*dt*13}else{if(turn)player.rotation.y+=turn*dt*2.4;if(move){player.position.x+=Math.sin(player.rotation.y)*move*dt*5;player.position.z+=Math.cos(player.rotation.y)*move*dt*5;legs.forEach((l,i)=>l.rotation.x=Math.sin(t*.012+i*Math.PI)*.45)}player.position.y+=(0-player.position.y)*Math.min(1,dt*9)}
+actor.position.x=THREE.MathUtils.clamp(actor.position.x,-103,103);actor.position.z=THREE.MathUtils.clamp(actor.position.z,-103,103);
+const target=actor.position.clone();target.y+=driving?2.3:2.1;const offset=new THREE.Vector3(0,(driving||drivingBoat)?6:5,(driving||drivingBoat)?-10:-8).applyAxisAngle(new THREE.Vector3(0,1,0),actor.rotation.y);camera.position.lerp(target.clone().add(offset),.09);camera.lookAt(target);
+if(!missionDone&&actor.position.distanceTo(marker.position)<4){missionDone=true;document.querySelector('#cash').textContent='$500';document.querySelector('#mission').innerHTML='MISSION 01 · COMPLETE<br><b>City Explorer — Reward $250</b>';hint.textContent='Mission complete! Explore the city.'}
+projectiles=projectiles.filter(p=>{p.mesh.position.addScaledVector(p.dir,dt*24);p.life-=dt;if(p.life<=0){scene.remove(p.mesh);return false}return true});water.material.opacity=.82+Math.sin(t*.0015)*.08;renderer.render(scene,camera)}requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
++(amount-300);hasWeapon=true;document.querySelector('#weaponShop').hidden=true;hint.textContent='Umenunua kifaa cha mchezo. Bonyeza × kutumia.'};
+
 const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');
 let stickPointer=null;
 function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.32,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}knob.style.transform=`translate(${dx}px,${dy}px)`;keys.left=dx < -max*.22;keys.right=dx > max*.22;keys.forward=dy < -max*.22;keys.back=dy > max*.22}
