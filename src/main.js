@@ -73,7 +73,7 @@ document.querySelector('#interact').onclick=()=>{
  if(player.position.distanceTo(boat.position)<6){hint.textContent='Bonyeza □ ili kuendesha boti.';return}
  hint.textContent='Hakuna kitu cha kuingiliana karibu nawe.'};
 document.querySelector('#closeShop').onclick=()=>document.querySelector('#weaponShop').hidden=true;
-document.querySelector('#buyWeapon').onclick=()=>{if(hasWeapon){hint.textContent='Tayari unamiliki kifaa hiki.';return}const cash=document.querySelector('#cash');const amount=Number(cash.textContent.replace(/[^0-9]/g,''));if(amount<300){hint.textContent='Huna fedha za kutosha. Tafuta misheni.';return}cash.textContent='
+document.querySelector('#buyWeapon').onclick=()=>{if(hasWeapon){hint.textContent='Tayari unamiliki kifaa hiki.';return}const cash=document.querySelector('#cash');const amount=Number(cash.textContent.replace(/[^0-9]/g,''));if(amount<300){hint.textContent='Huna fedha za kutosha. Tafuta misheni.';return}cash.textContent='$'+(amount-300);hasWeapon=true;document.querySelector('#weaponShop').hidden=true;hint.textContent='Umenunua kifaa cha mchezo. Bonyeza X kutumia.'};
 const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');
 let stickPointer=null;
 function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.32,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}knob.style.transform=`translate(${dx}px,${dy}px)`;keys.left=dx < -max*.22;keys.right=dx > max*.22;keys.forward=dy < -max*.22;keys.back=dy > max*.22}
