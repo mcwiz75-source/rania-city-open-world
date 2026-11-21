@@ -33,11 +33,16 @@ const roof=new THREE.Mesh(new THREE.BoxGeometry(w+.2,.35,d+.2),mat(0x39434c));ro
 for(let yy=2;yy<h-1;yy+=3.2){for(let xx=-w/2+1.2;xx<w/2;xx+=2.4){const win=new THREE.Mesh(new THREE.BoxGeometry(.95,1.1,.08),mat(0x8dd3e8,.3));win.position.set(x+xx,yy,z+d/2+.05);scene.add(win)}}}}
 function tree(x,z){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,2,7),mat(0x65452d));trunk.position.set(x,1,z);scene.add(trunk);const crown=new THREE.Mesh(new THREE.SphereGeometry(1.5,9,7),mat(0x34734a));crown.position.set(x,3,z);crown.castShadow=true;scene.add(crown)}
 for(let i=0;i<55;i++){let x=(Math.random()-.5)*190,z=(Math.random()-.5)*190;if(Math.abs(x)<9||Math.abs(z)<9||Math.abs(Math.abs(x)-55)<8||Math.abs(Math.abs(z)-48)<8)continue;tree(x,z)}
-// Player: stylised original character
-const player=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.95,4,8),mat(0x1d3557));body.position.y=1.05;body.castShadow=true;player.add(body);
-const head=new THREE.Mesh(new THREE.SphereGeometry(.34,12,10),mat(0x9b684b));head.position.y=1.92;player.add(head);
-const hair=new THREE.Mesh(new THREE.SphereGeometry(.35,10,8,0,Math.PI*2,0,Math.PI*.55),mat(0x171717));hair.position.y=2.05;player.add(hair);
-const legs=[];for(const x of [-.22,.22]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.17,.55,3,6),mat(0x242a32));leg.position.set(x,.35,0);player.add(leg);legs.push(leg)}
+// Mhusika mkuu: mwanaume, mhusika wa kubuni wa RANIA CITY
+const player=new THREE.Group();
+const skin=mat(0x9b684b),shirt=mat(0x1d3557),trousers=mat(0x242a32),shoes=mat(0x17191b);
+const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.85,5,10),shirt);torso.scale.set(1.12,1,0.82);torso.position.y=1.18;torso.castShadow=true;player.add(torso);
+const neck=new THREE.Mesh(new THREE.CylinderGeometry(.16,.19,.25,10),skin);neck.position.y=1.82;player.add(neck);
+const head=new THREE.Mesh(new THREE.SphereGeometry(.34,16,12),skin);head.scale.set(1,.99,.94);head.position.y=2.12;player.add(head);
+const hair=new THREE.Mesh(new THREE.SphereGeometry(.355,12,9,0,Math.PI*2,0,Math.PI*.55),mat(0x171717));hair.position.y=2.25;player.add(hair);
+const nose=new THREE.Mesh(new THREE.ConeGeometry(.075,.18,8),skin);nose.rotation.x=Math.PI/2;nose.position.set(0,2.1,.32);player.add(nose);
+const arms=[];for(const side of [-1,1]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.14,.62,4,8),shirt);arm.position.set(side*.59,1.25,0);arm.rotation.z=side*-.12;arm.castShadow=true;player.add(arm);arms.push(arm)}
+const legs=[];for(const x of [-.23,.23]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.18,.62,4,8),trousers);leg.position.set(x,.48,0);leg.castShadow=true;player.add(leg);legs.push(leg);const shoe=new THREE.Mesh(new THREE.BoxGeometry(.27,.14,.42),shoes);shoe.position.set(x,.12,.1);player.add(shoe)}
 player.position.set(0,0,8);scene.add(player);
 const car=new THREE.Group();const chassis=new THREE.Mesh(new THREE.BoxGeometry(2.3,.65,4),mat(0xc13e32));chassis.position.y=.8;car.add(chassis);const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.8,.8,1.9),mat(0x8ac3d4,.35));cabin.position.set(0,1.48,-.25);car.add(cabin);for(const x of [-1,1])for(const z of [-1.3,1.3]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.22,12),mat(0x17191b));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.42,z);car.add(wheel)}car.position.set(5,0,8);car.visible=true;scene.add(car);
 
