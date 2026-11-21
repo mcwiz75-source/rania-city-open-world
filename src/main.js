@@ -88,7 +88,6 @@ const target=actor.position.clone();target.y+=driving?2.3:2.1;const offset=new T
 if(!missionDone&&actor.position.distanceTo(marker.position)<4){missionDone=true;document.querySelector('#cash').textContent='$500';document.querySelector('#mission').innerHTML='MISSION 01 · COMPLETE<br><b>City Explorer — Reward $250</b>';hint.textContent='Mission complete! Explore the city.'}
 projectiles=projectiles.filter(p=>{p.mesh.position.addScaledVector(p.dir,dt*24);p.life-=dt;if(p.life<=0){scene.remove(p.mesh);return false}return true});water.material.opacity=.82+Math.sin(t*.0015)*.08;renderer.render(scene,camera)}requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-+(amount-300);hasWeapon=true;document.querySelector('#weaponShop').hidden=true;hint.textContent='Umenunua kifaa cha mchezo. Bonyeza × kutumia.'};
 const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');
 let stickPointer=null;
 function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.32,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}knob.style.transform=`translate(${dx}px,${dy}px)`;keys.left=dx < -max*.22;keys.right=dx > max*.22;keys.forward=dy < -max*.22;keys.back=dy > max*.22}
