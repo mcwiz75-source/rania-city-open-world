@@ -8,12 +8,15 @@ const hud=document.createElement('div');hud.id='hud';hud.innerHTML=`
 <div id="stats">HEALTH <b id="health">100</b> ♥<br>CASH <b id="cash">$250</b><br><span id="mode">ON FOOT</span></div>
 <div id="hint">Explore the city · Walk to the golden marker</div>
 <div id="controls">
-<div class="pad">
-<button class="gamebtn up" data-key="forward">▲</button><button class="gamebtn left" data-key="left">◀</button><button class="gamebtn down" data-key="back">▼</button><button class="gamebtn right" data-key="right">▶</button>
-</div>
-<div class="actions"><button class="gamebtn primary" id="action">ENTER CAR</button><button class="gamebtn" id="jump">JUMP</button><div class="smallnote">TOUCH CONTROLS</div></div>
+<div class="stick" id="stick" aria-label="Movement joystick"><div class="stick-ring">●</div><div class="stick-knob" id="knob"></div></div>
+<div class="actions">
+<div class="action-row"><button class="gamebtn face triangle" id="interact">△</button><button class="gamebtn face square" id="action">□</button></div>
+<div class="action-row"><button class="gamebtn face circle" id="exit">○</button><button class="gamebtn face cross" id="jump">×</button></div>
+<div class="smallnote">RANIA CITY CONTROLS</div></div>
 </div>`;
 app.appendChild(hud);
+document.documentElement.classList.add('game-landscape');
+try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); } catch (_) {}
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x8bc4df);scene.fog=new THREE.Fog(0x8bc4df,65,180);
 const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,400);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;app.prepend(renderer.domElement);
@@ -43,6 +46,15 @@ addEventListener('keydown',e=>{if(e.key==='w'||e.key==='ArrowUp')keys.forward=tr
 let driving=false,angle=0,missionDone=false;const action=document.querySelector('#action'),mode=document.querySelector('#mode'),hint=document.querySelector('#hint');
 action.onclick=()=>{if(!driving&&player.position.distanceTo(car.position)<4){driving=true;player.visible=false;mode.textContent='DRIVING';action.textContent='EXIT CAR';hint.textContent='Drive to explore · Use arrows to steer'}else if(driving){driving=false;player.position.copy(car.position);player.position.x+=2.7;player.visible=true;mode.textContent='ON FOOT';action.textContent='ENTER CAR'}else hint.textContent='Walk closer to the red car to enter'};
 document.querySelector('#jump').onclick=()=>{if(!driving)player.position.y=2.1};
+document.querySelector('#exit').onclick=()=>{if(driving)action.click();else hint.textContent='Ingia kwenye gari kwa kubonyeza □ ukiwa karibu nalo.'};
+document.querySelector('#interact').onclick=()=>{hint.textContent='Uchunguzi na mazungumzo ya Kiswahili yataongezwa kwenye hatua inayofuata.'};
+const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');
+let stickPointer=null;
+function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width*.32,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}knob.style.transform=`translate(${dx}px,${dy}px)`;keys.left=dx < -max*.22;keys.right=dx > max*.22;keys.forward=dy < -max*.22;keys.back=dy > max*.22}
+stick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)moveStick(e)});
+function resetStick(){stickPointer=null;knob.style.transform='translate(0,0)';keys.left=keys.right=keys.forward=keys.back=false}
+stick.addEventListener('pointerup',resetStick);stick.addEventListener('pointercancel',resetStick);
 let last=0;function animate(t){requestAnimationFrame(animate);const dt=Math.min((t-last)/1000||0,.04);last=t;marker.rotation.z+=dt*1.3;const actor=driving?car:player;let move=0,turn=0;if(keys.forward)move=1;if(keys.back)move=-.7;if(keys.left)turn=1;if(keys.right)turn=-1;
 if(driving){angle+=turn*dt*1.8;car.rotation.y=angle;car.position.x+=Math.sin(angle)*move*dt*13;car.position.z+=Math.cos(angle)*move*dt*13}else{if(turn)player.rotation.y+=turn*dt*2.4;if(move){player.position.x+=Math.sin(player.rotation.y)*move*dt*5;player.position.z+=Math.cos(player.rotation.y)*move*dt*5;legs.forEach((l,i)=>l.rotation.x=Math.sin(t*.012+i*Math.PI)*.45)}player.position.y+=(0-player.position.y)*Math.min(1,dt*9)}
 actor.position.x=THREE.MathUtils.clamp(actor.position.x,-103,103);actor.position.z=THREE.MathUtils.clamp(actor.position.z,-103,103);
