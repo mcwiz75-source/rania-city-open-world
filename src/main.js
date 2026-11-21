@@ -45,6 +45,9 @@ const nose=new THREE.Mesh(new THREE.ConeGeometry(.075,.18,8),skin);nose.rotation
 const arms=[];for(const side of [-1,1]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.14,.62,4,8),shirt);arm.position.set(side*.59,1.25,0);arm.rotation.z=side*-.12;arm.castShadow=true;player.add(arm);arms.push(arm)}
 const legs=[];for(const x of [-.23,.23]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.18,.62,4,8),trousers);leg.position.set(x,.48,0);leg.castShadow=true;player.add(leg);legs.push(leg);const shoe=new THREE.Mesh(new THREE.BoxGeometry(.27,.14,.42),shoes);shoe.position.set(x,.12,.1);player.add(shoe)}
 player.position.set(0,0,8);scene.add(player);
+const nameCanvas=document.createElement('canvas');nameCanvas.width=256;nameCanvas.height=64;
+const nameCtx=nameCanvas.getContext('2d');nameCtx.font='bold 42px Arial';nameCtx.textAlign='center';nameCtx.fillStyle='#ffffff';nameCtx.strokeStyle='#101820';nameCtx.lineWidth=8;nameCtx.strokeText('MUHSIN',128,46);nameCtx.fillText('MUHSIN',128,46);
+const nameTexture=new THREE.CanvasTexture(nameCanvas);const nameTag=new THREE.Sprite(new THREE.SpriteMaterial({map:nameTexture,transparent:true,depthTest:false}));nameTag.scale.set(2.5,.62,1);nameTag.position.y=2.95;player.add(nameTag);
 const car=new THREE.Group();const chassis=new THREE.Mesh(new THREE.BoxGeometry(2.3,.65,4),mat(0xc13e32));chassis.position.y=.8;car.add(chassis);const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.8,.8,1.9),mat(0x8ac3d4,.35));cabin.position.set(0,1.48,-.25);car.add(cabin);for(const x of [-1,1])for(const z of [-1.3,1.3]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.22,12),mat(0x17191b));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.42,z);car.add(wheel)}car.position.set(5,0,8);car.visible=true;scene.add(car);
 
 // Ziwa na boti ya kuendesha
